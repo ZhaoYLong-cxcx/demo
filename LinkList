@@ -1,0 +1,398 @@
+class Node {
+    public int data;
+    public Node next;
+
+    public Node() {
+    }
+
+    public Node(int data) {
+        this.data = data;
+    }
+}
+/*
+ * 单链表  我们先构造节点
+ * */
+
+class LinkedList {
+    /*
+     * 头插法
+     * */
+    //创建头
+    public Node head;
+
+    public void addFirst(int data) {
+        Node node = new Node(data);
+        if (this.head == null) {
+            this.head = node;
+        } else {
+            node.next = this.head;
+            this.head = node;
+        }
+    }
+
+    /*
+     * 尾插法
+     * */
+    public void addLast(int data) {
+        Node node = new Node(data);
+        if (this.head == null) {
+            this.head = node;
+        } else {
+            Node cur = this.head;
+            while (cur.next != null) {
+                cur = cur.next;
+            }
+            cur.next = node;
+        }
+    }
+
+    /*
+     * 任一点进行插入
+     * 1.查找前驱
+     * 2.判断下标是否合法
+     * 3.长度
+     * 4.addIndex
+     *
+     * */
+    public Node searchIndex(int index) {
+        int count = 0;
+        Node cur = this.head;
+        while (count < index - 1) {
+            cur = cur.next;
+            count++;
+        }
+        return cur;
+    }
+
+    public void checkIndex(int index) {
+        if (index < 0 || index > getLength()) {
+            throw new
+                    IndexOutOfBoundsException("下标不合法");
+        }
+    }
+
+    private int getLength() {
+        int count = 0;
+        Node cur = this.head;
+        while (cur != null) {
+            cur = cur.next;
+            count++;
+        }
+        return count;
+    }
+
+    public boolean addIndex(int index, int data) {
+        checkIndex(index);
+        if (index == 0) {
+            addFirst(data);
+            return true;
+        }
+        Node cur = searchIndex(index);
+        Node node = new Node(data);
+        node.next = cur.next;
+        cur.next = node;
+        return true;
+    }
+
+    public void display() {
+        Node cur = this.head;
+        while (cur != null) {
+            System.out.print(cur.data + " ");
+            cur = cur.next;
+        }
+        System.out.println();
+    }
+
+    //单链表删除所有的节点分为两种1.头结点的话直接将头后移即可
+    //2.我们是需要找到要删除节点的前驱然后和现在要删除的节点
+// 然后只需要将要删除的节点next，赋值给前驱即可
+    /*
+     * 删除一个任意的节点key
+     * key在节点中就是我们的data
+     * */
+    public void remove(int key) {
+        //考虑我们删除的是头结点
+        if (this.head.data == key) {
+            this.head = this.head.next;
+        }
+        //不是头结点情况   我们需要先找前驱
+        Node prev = searchPrev(key);
+        if (prev == null) {
+            return;
+        }
+        Node del = prev.next;
+        prev.next = del.next;
+    }
+
+    private Node searchPrev(int key) {
+        Node prev = this.head;
+        while (prev.next != null) {
+            if (prev.next.data == key) {
+                return prev;
+            }
+            prev = prev.next;
+        }
+        return null;
+    }
+
+    /*
+     * 删除所有key的节点
+     * 循环体的条件是cur!=null
+     * 我们是为了保证下标不越界
+     * 然后用prev.next来一直判断cur的data
+     * */
+    public void removeAll(int key) {
+        Node prev = this.head;
+        Node cur = this.head.next;
+        while (cur != null) {
+            if (prev.next.data == key) {
+                //删除1223中的2    我们在删除第一个2 是不能让我们的prev 离开1
+                // 所以是需要将我们的cur往后移重复遍历
+                prev.next = cur.next;
+                cur = prev.next;
+            } else {
+                prev = cur;
+                cur = prev.next;
+            }
+        }
+        if (this.head.data == key) {
+            this.head = this.head.next;
+        }
+    }
+
+    public void display1(Node newHead) {
+        Node cur = newHead;
+        while (cur != null) {
+            System.out.print(cur.data + " ");
+            cur = cur.next;
+        }
+        System.out.println();
+    }
+
+    public Node findMidNode() {
+        Node fast = this.head;
+        Node slow = this.head;
+        while (fast != null && fast.next != null) {
+            fast = fast.next.next;
+            slow = slow.next;
+        }
+        return slow;
+    }
+
+    /*
+     * 查找倒数第K个
+     * 节点
+     * 这个和我们查找中间值是一样的原理
+     * 查找倒数第几个  我们就定义两个A，B都为头的节点，
+     * A先提前走k步后，然后A,B同时走，等A走到头，B所在的位置就是我们查找的倒数第k个
+     * */
+    public Node findKthToTail(int k) {
+        if (k <= 0) {
+            return null;
+        }
+        Node fast = this.head;
+        Node slow = this.head;
+        while (k - 1 > 0) {
+            if (fast.next != null) {
+                fast = fast.next;
+                k--;
+            } else {
+                System.out.println("没有此节点");
+                return null;
+            }
+        }
+        while (fast.next != null) {
+            fast = fast.next;
+            slow = slow.next;
+        }
+        return slow;
+    }
+
+    /*
+     * 求单链表的长度
+     * */
+    public int size(Node head) {
+        int size = 0;
+        Node cur = head;
+        while (cur != null) {
+            size++;
+            cur = cur.next;
+        }
+        return size;
+    }
+
+    /*
+     * 删除联系出现的重复的节点
+     * */
+    public Node deleteDuplication() {
+        Node newHead = new Node(-1);
+        Node tem = newHead;
+        Node cur = this.head;
+        while (cur != null) {
+            if (cur.next != null && cur.data == cur.next.data) {
+                while (cur.next != null && cur.data == cur.next.data) {
+                    cur = cur.next;
+                }
+                cur = cur.next;
+                tem.next = cur;
+            } else {
+                tem.next = cur;
+                tem = tem.next;
+                cur = cur.next;
+            }
+        }
+        return newHead;
+    }
+
+    /*
+     * 反转单链表
+     * */
+    public Node reversList() {
+        Node prev = null;
+        Node cur = this.head;
+        Node newHe1ad = null;
+        while (cur != null) {
+            Node curNext = cur.next;
+            //是最后才走到我们下一个节点完后会走到这个判断条件
+            if (curNext == null) {
+                newHe1ad = cur;
+            }
+            cur.next = prev;//将第一个next置为null
+            prev = cur;
+            cur = curNext;
+        }
+        return newHe1ad;
+    }
+/*
+    * 基准：
+    * 指定一个数，左边都是比它小的 右边都是比它大的
+    * Node curNext=cur.next;
+       cur.next=null;
+     这段代码的表达的是，我们需要将每一个节点拆开，但是我们需要先记录下来我们的
+    下一个节点地址，否则我们无法完成遍历，也无法将每一个节点拆开。
+    * */
+    public Node partition(int x) {
+        Node beforeStart = null;
+        Node beforeEnd = null;
+        Node afterStart = null;
+        Node afterEnd = null;
+        Node cur = this.head;
+        while (cur != null) {
+            Node curNext = cur.next;
+            cur.next = null;
+            if (cur.data < x) {
+                if (beforeStart == null) {
+                    beforeStart = cur;
+                    beforeEnd = cur;
+                } else {
+                    beforeEnd.next = cur;
+                    beforeEnd = cur;
+                }
+            } else {
+                if (afterStart == null) {
+                    afterStart = cur;
+                    afterEnd = cur;
+                } else {
+                    afterEnd.next = cur;
+                    afterEnd = cur;
+                }
+            }
+            cur = curNext;
+        }
+        if (beforeStart == null) {
+            return afterStart;
+        }
+        beforeEnd.next = afterStart;
+        return beforeStart;
+    }
+/*
+       回文结构
+    *1.定义两个引用，目的：找到单链表的中间位置
+    * 2.进行翻转，翻转的是后半部分
+    * 3.一个head从头开始走，slow从尾巴开始走
+    * 4.只要发现对应的data不相同，呢么就不是回文
+    *
+    * */
+    public boolean chkPalindrome() {
+        if (this.head == null) {
+            return false;
+        }
+        if (this.head.next == null) {
+            return true;
+        }
+        Node fast = this.head;
+        Node slow = this.head;
+        while (fast != null && fast.next != null) {
+            fast = fast.next.next;
+            slow = slow.next;
+        }
+        Node p = slow.next;
+        while (p != null) {
+            Node pNext = p.next;
+            p.next = slow;
+            slow = p;
+            p = pNext;
+            if (p != null) {
+                pNext = p.next;
+            }
+        }
+        while (this.head != slow) {
+            if (this.head.data != slow.data) {
+                return false;
+            }
+            if (this.head.next == slow) {
+                return true;
+            }
+            this.head = this.head.next;
+            slow = slow.next;
+        }
+        return true;
+    }
+/*
+     * 1.创建一个环
+     * 2.判断是否有环
+     * 3.我们找到环的入口点
+     * */
+    public void createCycle() {
+        Node cur = this.head;
+        while (cur.next != null) {
+            cur = cur.next;
+        }
+        cur.next = this.head.next.next;
+    }
+
+    public boolean hasCycle() {
+        Node fast = this.head;
+        Node slow = this.head;
+        while (fast != null && fast.next != null) {
+            fast = fast.next.next;
+            slow = slow.next;
+            if (fast == slow) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public Node detectCycle() {
+        Node fast = this.head;
+        Node slow = this.head;
+        while (fast != null && fast.next != null) {
+            fast = fast.next.next;
+            slow = slow.next;
+            if (fast == slow) {
+                break;
+            }
+        }
+        if (fast == null || fast.next == null) {
+            return null;
+        }
+        fast = this.head;
+        while (fast != slow) {
+            fast = fast.next;
+            slow = slow.next;
+        }
+        return fast;
+    }
+}
+
